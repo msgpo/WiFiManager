@@ -602,7 +602,9 @@ boolean WiFiManager::stopConfigPortal(){
 
   //DNS handler
   dnsServer->processNextRequest();
-  //HTTP handler
+  //HTTP handler    }
+
+
   server->handleClient();
 
   // @todo what is the proper way to shutdown and free the server up
@@ -928,7 +930,7 @@ void WiFiManager::handleParam(){
 
 
 String WiFiManager::getMenuOut(){
-  String page;  
+  String page;
 
   for(auto menuId :_menuIds ){
     if(((String)menuId == "param") && (_paramsCount == 0)) continue; // no params set, omit params
@@ -1206,13 +1208,12 @@ void WiFiManager::handleWifiSave() {
     optionalIPFromString(&_sta_static_dns, dns.c_str());
     DEBUG_WM(DEBUG_DEV,F("static DNS:"),dns);
   }
-
   String page = getHTTPHead(FPSTR(S_titlewifisaved)); // @token titlewifisaved
   page += FPSTR(HTTP_SAVED);
   page += FPSTR(HTTP_END);
 
+  // ulno: TODO: check: crash here fixed?
   server->sendHeader(FPSTR(HTTP_HEAD_CL), String(page.length()));
-  server->sendHeader(FPSTR(HTTP_HEAD_CORS), FPSTR(HTTP_HEAD_CORS_ALLOW_ALL));
   server->send(200, FPSTR(HTTP_HEAD_CT), page);
 
   DEBUG_WM(DEBUG_DEV,F("Sent wifi save page"));
@@ -1638,7 +1639,12 @@ boolean WiFiManager::captivePortal() {
 
   if (!isIp(server->hostHeader())) {
     DEBUG_WM(DEBUG_VERBOSE,F("<- Request redirected to captive portal"));
-    server->sendHeader(F("Location"), (String)F("http://") + toStringIp(server->client().localIP()), true);
+    server->sendHeader(F("Location"), (String)F("http://") 
+      + toStringIp(server->client().localIP()
+#ifdef CAPTIVE_REDIRECT_TO_WIFI
+      + (String)F("/wifi")
+#endif
+      ), true);
     server->send ( 302, FPSTR(HTTP_HEAD_CT2), ""); // Empty content inhibits Content-length header so we have to close the socket ourselves.
     server->client().stop(); // Stop is needed because we sent no content length
     return true;
@@ -1929,10 +1935,10 @@ void WiFiManager::setRemoveDuplicateAPs(boolean removeDuplicates) {
  * if disabled use with process() to manually process webserver
  * @since $dev
  * @access public
- * @param boolean shoudlBlock [false]
+ * @param boolean shouldBlock [false]
  */
-void WiFiManager::setConfigPortalBlocking(boolean shoudlBlock) {
-  _configPortalIsBlocking = shoudlBlock;
+void WiFiManager::setConfigPortalBlocking(boolean shouldBlock) {
+  _configPortalIsBlocking = shouldBlock;
 }
 
 /**
