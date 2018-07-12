@@ -1639,12 +1639,11 @@ boolean WiFiManager::captivePortal() {
 
   if (!isIp(server->hostHeader())) {
     DEBUG_WM(DEBUG_VERBOSE,F("<- Request redirected to captive portal"));
-    server->sendHeader(F("Location"), (String)F("http://") 
-      + toStringIp(server->client().localIP()
-#ifdef CAPTIVE_REDIRECT_TO_WIFI
-      + (String)F("/wifi")
-#endif
-      ), true);
+    String redirectGoal = (String)F("http://") 
+      + toStringIp(server->client().localIP());
+    if(_cpWifiRedirect)
+      redirectGoal += (String)F("/wifi");
+    server->sendHeader(F("Location"), redirectGoal, true);
     server->send ( 302, FPSTR(HTTP_HEAD_CT2), ""); // Empty content inhibits Content-length header so we have to close the socket ourselves.
     server->client().stop(); // Stop is needed because we sent no content length
     return true;
@@ -2013,6 +2012,16 @@ void WiFiManager::setWiFiAutoReconnect(boolean enabled){
  */
 void WiFiManager::setCaptivePortalClientCheck(boolean enabled){
   _cpClientCheck = enabled;
+}
+
+/**
+ * make the captive portal redirect to the wifi-page directly (true), or use the root/menu (false)
+ * @since $dev
+ * @access public
+ * @param boolean enabled [false]
+ */
+void WiFiManager::setCaptivePortalWifiRedirect(boolean enabled){
+  _cpWifiRedirect = enabled;
 }
 
 /**

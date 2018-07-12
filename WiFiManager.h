@@ -204,7 +204,9 @@ class WiFiManager
     void          setCaptivePortalEnable(boolean enabled);
     //if false, timeout captive portal even if a STA client connected (false), suggest disabling if captiveportal is open
     void          setCaptivePortalClientCheck(boolean enabled);
-    //if true, reset timeout when webclient connects (true), suggest disabling if captiveportal is open    
+    // make the captive portal redirect to the wifi-page directly (true), or use the root/menu (false)
+    void          setCaptivePortalWifiRedirect(boolean enabled);
+    // if true, reset timeout when webclient connects (true), suggest disabling if captiveportal is open    
     void          setWebPortalClientCheck(boolean enabled);
     // if true, enable autoreconnecting
     void          setWiFiAutoReconnect(boolean enabled);
@@ -302,6 +304,7 @@ class WiFiManager
     boolean       _enableCaptivePortal    = true;  // enable captive portal redirection
     boolean       _userpersistent         = true;  // users preffered persistence to restore
     boolean       _wifiAutoReconnect      = true;  // there is no platform getter for this, we must assume its true and make it so
+    boolean       _cpWifiRedirect         = false; // redirect to Wifi sub configuration instead of root
     boolean       _cpClientCheck          = false; // keep cp alive if cp have station
     boolean       _webClientCheck         = true;  // keep cp alive if web have client
     boolean       _scanDispOptions        = false; // show percentage in scans not icons
