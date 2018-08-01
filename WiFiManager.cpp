@@ -1117,7 +1117,17 @@ String WiFiManager::getParamOut(){
     char parLength[5];
     // add the extra parameters to the form
     for (int i = 0; i < _paramsCount; i++) {
-      if (_params[i] == NULL || _params[i]->_length == 0) {
+      // TODO: remove debug when fixed
+      if(_params[i] == NULL) {
+        DEBUG_WM(DEBUG_DEV,"WParam is NULL");
+      } else {
+        DEBUG_WM(DEBUG_DEV,"WParam is not NULL");
+        DEBUG_WM(DEBUG_DEV,"WParam length",_params[i]->_length);
+        DEBUG_WM(DEBUG_DEV,"WParam content",_params[i]->getCustomHTML());
+      }
+      // TODO: fix in community way
+      // if (_params[i] == NULL || _params[i]->_length == 0) {
+      if (_params[i] == NULL || (_params[i]->getCustomHTML() == NULL && _params[i]->_length == 0)) {
         DEBUG_WM(DEBUG_ERROR,"[ERROR] WiFiManagerParameter is out of scope");
         break;
       }
@@ -1212,7 +1222,6 @@ void WiFiManager::handleWifiSave() {
   page += FPSTR(HTTP_SAVED);
   page += FPSTR(HTTP_END);
 
-  // ulno: TODO: check: crash here fixed?
   server->sendHeader(FPSTR(HTTP_HEAD_CL), String(page.length()));
   server->send(200, FPSTR(HTTP_HEAD_CT), page);
 
